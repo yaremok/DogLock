@@ -108,8 +108,8 @@
 
 #define SAMPLES_IN_BUFFER 5
 
-#define BATTARY_VOLTAGE_INPUT_PIN       NRF_SAADC_INPUT_AIN4
-//#define BATTARY_VOLTAGE_INPUT_PIN       NRF_SAADC_INPUT_VDD
+//#define BATTARY_VOLTAGE_INPUT_PIN       NRF_SAADC_INPUT_AIN4
+#define BATTARY_VOLTAGE_INPUT_PIN       NRF_SAADC_INPUT_VDD
 
 // RESOLUTION : 12 bit;
 // Defaults for SE (single ended mode)
@@ -175,43 +175,43 @@ void saadc_sampling_event_init(void)
 {
     ret_code_t err_code;
 
-    err_code = nrf_drv_ppi_init();
-    APP_ERROR_CHECK(err_code);
+    //err_code = nrf_drv_ppi_init();
+    //APP_ERROR_CHECK(err_code);
 
-    nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
-    timer_cfg.bit_width = NRF_TIMER_BIT_WIDTH_32;
-    err_code = nrf_drv_timer_init(&m_timer, &timer_cfg, timer_handler);
-    APP_ERROR_CHECK(err_code);
+    //nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+    //timer_cfg.bit_width = NRF_TIMER_BIT_WIDTH_32;
+    //err_code = nrf_drv_timer_init(&m_timer, &timer_cfg, timer_handler);
+    //APP_ERROR_CHECK(err_code);
 
-    /* setup m_timer for compare event every 400ms */
-    uint32_t ticks = nrf_drv_timer_ms_to_ticks(&m_timer, 400);
-    nrf_drv_timer_extended_compare(&m_timer,
-                                   NRF_TIMER_CC_CHANNEL0,
-                                   ticks,
-                                   NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-                                   false);
-    nrf_drv_timer_enable(&m_timer);
+    ///* setup m_timer for compare event every 400ms */
+    //uint32_t ticks = nrf_drv_timer_ms_to_ticks(&m_timer, 400);
+    //nrf_drv_timer_extended_compare(&m_timer,
+    //                               NRF_TIMER_CC_CHANNEL0,
+    //                               ticks,
+    //                               NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+    //                               false);
+    //nrf_drv_timer_enable(&m_timer);
 
-    uint32_t timer_compare_event_addr = nrf_drv_timer_compare_event_address_get(&m_timer,
-                                                                                NRF_TIMER_CC_CHANNEL0);
-    uint32_t saadc_sample_task_addr   = nrf_drv_saadc_sample_task_get();
+    //uint32_t timer_compare_event_addr = nrf_drv_timer_compare_event_address_get(&m_timer,
+    //                                                                            NRF_TIMER_CC_CHANNEL0);
+    //uint32_t saadc_sample_task_addr   = nrf_drv_saadc_sample_task_get();
 
-    /* setup ppi channel so that timer compare event is triggering sample task in SAADC */
-    err_code = nrf_drv_ppi_channel_alloc(&m_ppi_channel);
-    APP_ERROR_CHECK(err_code);
+    ///* setup ppi channel so that timer compare event is triggering sample task in SAADC */
+    //err_code = nrf_drv_ppi_channel_alloc(&m_ppi_channel);
+    //APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_drv_ppi_channel_assign(m_ppi_channel,
-                                          timer_compare_event_addr,
-                                          saadc_sample_task_addr);
-    APP_ERROR_CHECK(err_code);
+    //err_code = nrf_drv_ppi_channel_assign(m_ppi_channel,
+    //                                      timer_compare_event_addr,
+    //                                      saadc_sample_task_addr);
+    //APP_ERROR_CHECK(err_code);
 }
 
 
 void saadc_sampling_event_enable(void)
 {
-    ret_code_t err_code = nrf_drv_ppi_channel_enable(m_ppi_channel);
+    //ret_code_t err_code = nrf_drv_ppi_channel_enable(m_ppi_channel);
 
-    APP_ERROR_CHECK(err_code);
+    //APP_ERROR_CHECK(err_code);
 }
 
 
@@ -255,7 +255,6 @@ void saadc_init(void)
 {
     ret_code_t err_code;
     nrf_saadc_channel_config_t channel_config =
-    //NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_VDD);
     NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(BATTARY_VOLTAGE_INPUT_PIN);
 
     err_code = nrf_drv_saadc_init(NULL, saadc_callback);
@@ -310,6 +309,8 @@ static void timer_timeout_handler(void * p_context)
     my_time++;
     our_time_characteristic_update(&m_our_service, &my_time);
     nrf_gpio_pin_toggle(LED_4);
+    uint32_t saadc_sample_task_addr   = nrf_drv_saadc_sample_task_get();
+    nrf_saadc_task_trigger(saadc_sample_task_addr);
 }
 
 
